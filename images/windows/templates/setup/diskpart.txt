@@ -1,0 +1,5 @@
+sel disk 0
+sel part 4
+del part override
+sel part 3
+extend
