@@ -9,34 +9,48 @@ packer {
   }
 }
 
-locals {
-  vcenter_username = vault("secret/infrastructure/system/vcenter/Administrator", "username")
-  act_runner_username = vault("secret/infrastructure/common/act_runner", "username")
-  act_installer_username = vault("secret/infrastructure/common/act_installer", "username")
+variable "vcenter_username" {
+  type = string
+  default = "${env("VCENTER_USERNAME")}"
 }
 
-local "vcenter_password" {
-  expression = vault("secret/infrastructure/system/vcenter/Administrator", "password")
+variable "vcenter_password" {
+  type = string
+  default = "${env("VCENTER_PASSWORD")}"
   sensitive = true
 }
 
-local "act_runner_password" {
-  expression = vault("secret/infrastructure/common/act_runner", "password")
+variable "act_runner_username" {
+  type = string
+  default = "${env("ACT_RUNNER_USERNAME")}"
+}
+
+variable "act_runner_password" {
+  type = string
+  default = "${env("ACT_RUNNER_PASSWORD")}"
   sensitive = true
 }
 
-local "act_installer_password" {
-  expression = vault("secret/infrastructure/common/act_installer", "password")
+variable "act_installer_username" {
+  type = string
+  default = "${env("ACT_INSTALLER_USERNAME")}"
+}
+
+variable "act_installer_password" {
+  type = string
+  default = "${env("ACT_INSTALLER_PASSWORD")}"
   sensitive = true
 }
 
-local "admin_password" {
-  expression = vault("secret/infrastructure/common/Administrator", "password")
+variable "admin_password" {
+  type = string
+  default = "${env("ADMIN_PASSWORD")}"
   sensitive = true
 }
 
-local "product_key" {
-  expression = vault("secret/product/windows/server2022", "product_key")
+variable "product_key" {
+  type = string
+  default = "${env("PRODUCT_KEY")}"
   sensitive = true
 }
 
@@ -150,8 +164,8 @@ variable "temp_dir" {
 
 source "vsphere-clone" "vm_clone" {
   vcenter_server = "${var.vcenter_server}"
-  username = "${local.vcenter_username}"
-  password = "${local.vcenter_password}"
+  username = "${var.vcenter_username}"
+  password = "${var.vcenter_password}"
   cluster = "${var.cluster}"
   host = "${var.esxi_host}"
   template = "${var.src_vm}"
@@ -170,16 +184,16 @@ source "vsphere-clone" "vm_clone" {
   winrm_insecure = "true"
   winrm_use_ssl = "true"
   winrm_username = "Administrator"
-  winrm_password = "${local.admin_password}"
+  winrm_password = "${var.admin_password}"
   winrm_timeout = "10m"
 
   customize {
     windows_options {
       computer_name = "${var.vm_name}"
       workgroup = "ACT-TEMPLATES"
-      product_key = "${local.product_key}"
+      product_key = "${var.product_key}"
       time_zone = 4
-      admin_password = "${local.admin_password}"
+      admin_password = "${var.admin_password}"
       organization_name = "Stendahls AB"
       auto_logon = true
       auto_logon_count = 1
@@ -244,20 +258,20 @@ build {
 
   provisioner "windows-shell" {
     inline = [
-      "net user ${local.act_installer_username} ${local.act_installer_password} /add /passwordchg:no /passwordreq:yes /active:yes /Y",
-      "net localgroup Administrators ${local.act_installer_username} /add",
-      "net user ${local.act_runner_username} ${local.act_runner_password} /add /passwordchg:no /passwordreq:yes /active:yes /Y",
+      "net user ${var.act_installer_username} ${var.act_installer_password} /add /passwordchg:no /passwordreq:yes /active:yes /Y",
+      "net localgroup Administrators ${var.act_installer_username} /add",
+      "net user ${var.act_runner_username} ${var.act_runner_password} /add /passwordchg:no /passwordreq:yes /active:yes /Y",
       "winrm set winrm/config/service/auth @{Basic=\"true\"}",
       "winrm get winrm/config/service/auth"
     ]
   }
   provisioner "powershell" {
-    inline = ["if (-not ((net localgroup Administrators) -contains '${local.act_installer_username}')) { exit 1 }"]
+    inline = ["if (-not ((net localgroup Administrators) -contains '${var.act_installer_username}')) { exit 1 }"]
   }
 
   provisioner "powershell" {
-    elevated_password = "${local.act_installer_password}"
-    elevated_user     = "${local.act_installer_username}"
+    elevated_password = "${var.act_installer_password}"
+    elevated_user     = "${var.act_installer_username}"
     inline            = ["bcdedit.exe /set TESTSIGNING ON"]
   }
 
@@ -305,8 +319,8 @@ build {
   }
 
   provisioner "powershell" {
-    elevated_password = "${local.act_installer_password}"
-    elevated_user     = "${local.act_installer_username}"
+    elevated_password = "${var.act_installer_password}"
+    elevated_user     = "${var.act_installer_username}"
     environment_vars  = ["IMAGE_FOLDER=${var.image_folder}", "TEMP_DIR=${var.temp_dir}"]
     scripts           = [
       "${path.root}/../scripts/build/Install-VisualStudio.ps1",
@@ -403,8 +417,8 @@ build {
   }
 
   provisioner "powershell" {
-    elevated_password = "${local.act_installer_password}"
-    elevated_user     = "${local.act_installer_username}"
+    elevated_password = "${var.act_installer_password}"
+    elevated_user     = "${var.act_installer_username}"
     environment_vars  = ["IMAGE_FOLDER=${var.image_folder}", "TEMP_DIR=${var.temp_dir}"]
     scripts           = [
       "${path.root}/../scripts/build/Install-WindowsUpdates.ps1",
@@ -458,7 +472,7 @@ build {
   }
 
   provisioner "powershell" {
-    environment_vars = ["INSTALL_USER=${local.act_installer_username}"]
+    environment_vars = ["INSTALL_USER=${var.act_installer_username}"]
     scripts          = [
       "${path.root}/../scripts/build/Install-NativeImages.ps1",
       "${path.root}/../scripts/build/Configure-System.ps1",
