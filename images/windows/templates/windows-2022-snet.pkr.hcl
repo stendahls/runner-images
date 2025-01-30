@@ -100,6 +100,17 @@ variable "vm_ip" {
   default = ""
 }
 
+// Local variables
+variable "devel_dir" {
+  type = string
+  default = "C:\\devel"
+}
+
+variable "devel_bin_dir" {
+  type = string
+  default = "C:\\devel\\bin"
+}
+
 // Upstream variables
 variable "agent_tools_directory" {
   type    = string
@@ -153,6 +164,7 @@ source "vsphere-clone" "vm_clone" {
   RAM = var.ram_gb * 1024
   video_ram = 16 * 1024
   firmware = "efi"
+  NestedHV = true
 
   communicator = "winrm"
   winrm_insecure = "true"
@@ -195,7 +207,9 @@ build {
   provisioner "powershell" {
     inline = [
       "New-Item -Path ${var.image_folder} -ItemType Directory -Force",
-      "New-Item -Path ${var.temp_dir} -ItemType Directory -Force"
+      "New-Item -Path ${var.temp_dir} -ItemType Directory -Force",
+      "New-Item -Path ${var.devel_dir} -ItemType Directory -Force",
+      "New-Item -Path ${var.devel_bin_dir} -ItemType Directory -Force"
     ]
   }
 
