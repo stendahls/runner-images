@@ -52,4 +52,5 @@ EOF
 
 set_envs
 
+export PACKER_LOG_PATH=/var/tmp/packer.log
 exec packer "$@"

@@ -1131,3 +1131,14 @@ function Get-MicrosoftPublisher {
 
     return "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
 }
+
+# Try to work around bizarre "env vars missing" situation
+if (-not $env:IMAGE_FOLDER) {
+    Write-Host "Environment variable IMAGE_FOLDER missing, setting default"
+    $env:IMAGE_FOLDER = "C:\image"
+}
+
+if (-not $env:TEMP_DIR) {
+    Write-Host "Environment variable TEMP_DIR missing, setting default"
+    $env:TEMP_DIR = "C:\tmp"
+}
