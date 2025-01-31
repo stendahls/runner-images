@@ -1134,11 +1134,11 @@ function Get-MicrosoftPublisher {
 
 # Try to work around bizarre "env vars missing" situation
 if (-not $env:IMAGE_FOLDER) {
-    Write-Host "Environment variable IMAGE_FOLDER missing, setting default"
+    Write-Warning "Environment variable IMAGE_FOLDER missing, setting default"
     $env:IMAGE_FOLDER = "C:\image"
 }
 
 if (-not $env:TEMP_DIR) {
-    Write-Host "Environment variable TEMP_DIR missing, setting default"
+    Write-Warning "Environment variable TEMP_DIR missing, setting default"
     $env:TEMP_DIR = "C:\tmp"
 }
