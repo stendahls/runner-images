@@ -305,6 +305,7 @@ build {
   }
 
   provisioner "powershell" {
+    pause_before = "1m"
     inline = ["Set-Service -Name wlansvc -StartupType Manual", "if ($(Get-Service -Name wlansvc).Status -eq 'Running') { Stop-Service -Name wlansvc}"]
   }
 
