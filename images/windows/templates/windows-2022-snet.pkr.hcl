@@ -256,6 +256,13 @@ build {
     ]
   }
 
+  provisioner "powershell" {
+    inline = [
+      // We don't install Runner
+      "Remove-Item '${var.image_folder}\\tests\\RunnerCache.tests.ps1'"
+    ]
+  }
+
   provisioner "windows-shell" {
     inline = [
       "net user ${var.act_installer_username} ${var.act_installer_password} /add /passwordchg:no /passwordreq:yes /active:yes /Y",
