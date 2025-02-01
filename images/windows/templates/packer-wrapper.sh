@@ -1,5 +1,10 @@
 #!/bin/bash
 
+die () {
+    echo "$@" >&2
+    exit 1
+}
+
 #
 # Echo:
 #  env_name vault-path property 
@@ -18,9 +23,11 @@ EOF
 }
 
 set_envs () {
-    local env_name path prop v
+    local env_name path prop v r
     while read env_name path prop; do
         v=$(vault read -field="$prop" "$path")
+        r=$?
+        [ $r -eq 0 ] || die "vault read of '${path}.${prop}' failed"
         eval export ${env_name}="$v"
     done < <(ls_envs)
 }
