@@ -29,7 +29,9 @@ function Get-SDKVersionsToInstall {
         $sdks += $release.'sdks'
     }
 
+    # FIXME: Workaround until https://github.com/actions/runner-images/issues/11791 is resolved
     return $sdks.version `
+    | Where-Object { !$_.Equals('9.0.201') } `
     | Sort-Object { [Version] $_ } -Unique `
     | Group-Object { $_.Substring(0, $_.LastIndexOf('.') + 2) } `
     | ForEach-Object { $_.Group[-1] }
