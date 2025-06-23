@@ -305,11 +305,11 @@ build {
   }
 
   provisioner "powershell" {
-    pause_before = "1m"
     inline = ["Set-Service -Name wlansvc -StartupType Manual", "if ($(Get-Service -Name wlansvc).Status -eq 'Running') { Stop-Service -Name wlansvc}"]
   }
 
   provisioner "powershell" {
+    pause_before = "2m"
     environment_vars = ["IMAGE_FOLDER=${var.image_folder}", "TEMP_DIR=${var.temp_dir}"]
     scripts          = [
       "${path.root}/../scripts/build/Install-Docker.ps1",
