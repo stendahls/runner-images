@@ -81,7 +81,7 @@ variable "vm_name" {
 
 variable "datastore" {
   type = string
-  default = "SYN02-VMDATA1"
+  default = "ZS2-VMDATA1"
 }
 
 variable "disk_size_gb" {
